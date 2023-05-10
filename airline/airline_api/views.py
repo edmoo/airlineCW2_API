@@ -62,7 +62,7 @@ def flight_list(request):
             'priority_price': 10,
             'luggage_pricing': luggageDict,
             })
-            return JsonResponse(flightArr, safe=False)
+            return JsonResponse({"flights":flightArr}, safe=False)
 
 @csrf_exempt
 def airports(request):

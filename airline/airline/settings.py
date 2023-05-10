@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-0xe_!v5$65=no6++a4g(5sk1%(!f8z1s()otbs3-)hl_p9yv+j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'sc20em.pythonanywhere.com']
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
