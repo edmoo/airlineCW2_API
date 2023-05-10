@@ -137,7 +137,7 @@ def get_flight(request, flight_id):
     'priority_price': 10,
     'luggage_pricing': luggageDict,
     }
-    return JsonResponse({"flights":found_flight}, safe=False)
+    return JsonResponse({"flights":[found_flight]}, safe=False)
 
 @csrf_exempt
 def flight(request):
