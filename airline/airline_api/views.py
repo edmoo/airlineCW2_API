@@ -55,7 +55,6 @@ def flight_list(request):
             'departure_time': flight.departure_time,
             'duration': duration_in_minutes,
             'arrival_time': flight.departure_time+flight.duration,
-            'seats': seat_list,
             'plane_type': flight.plane_type,
             'price': flight.price,
             'insurance_price': 15,
