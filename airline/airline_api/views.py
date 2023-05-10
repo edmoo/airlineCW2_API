@@ -77,7 +77,7 @@ def airports(request):
             'terminals': airport.terminals,
             'country': airport.country
         })
-    return JsonResponse(airArr, safe=False)
+    return JsonResponse({"airports":airArr}, safe=False)
 
 @csrf_exempt
 def get_flight(request, flight_id):
@@ -137,7 +137,7 @@ def get_flight(request, flight_id):
     'priority_price': 10,
     'luggage_pricing': luggageDict,
     }
-    return JsonResponse(found_flight, safe=False)
+    return JsonResponse({"flights":found_flight}, safe=False)
 
 @csrf_exempt
 def flight(request):
@@ -156,7 +156,7 @@ def flight(request):
         "carry-on": 20.0,
         "checked-in": 30.0
         }
-
+    flightArr = []
     for flight in flights:  
         if(flight.origin.code==origin and flight.destination.code==destination):
             if(flight.departure_time.date()==departure_date and flight.number_of_seats > number_of_people):
@@ -191,7 +191,7 @@ def flight(request):
                 }
                 
                 duration_in_minutes = int(flight.duration.total_seconds()//60)
-                found_flight = {
+                flightArr.append({
                 'flight_id': flight.id,
                 'airline': "New Airline",
                 'origin': my_origin,
@@ -205,9 +205,10 @@ def flight(request):
                 'insurance_price': 15,
                 'priority_price': 10,
                 'luggage_pricing': luggageDict,
-                }
-                return JsonResponse(found_flight, safe=False)
-    raise Http404("Flight not found")
+                })
+    if(flightArr == []):
+        raise Http404("Flight not found")
+    return JsonResponse({"flights":flightArr}, safe=False)
     
             
 
@@ -237,7 +238,7 @@ def add_booking(request,flight_id):
                     flight=flight,
                     price=flight.price,
                     insurance=insurance,
-                    status = "PENDING",
+                    status = "Waiting for payment",
                     start_time = datetime.now()
                 )
                 for passenger in passengers:
@@ -254,7 +255,7 @@ def add_booking(request,flight_id):
                             first_name = passenger['first_name'],
                             surname = passenger['last_name'],
                             luggage = passenger['luggage'],
-                            passport = passenger['passportID'],
+                            passport = passenger['passport_id'],
                             seat = assign_seat,
                             booking = new_booking
                         )
@@ -272,6 +273,7 @@ def add_booking(request,flight_id):
             "flight_id": flight.id,
             "booking_id": new_booking.id,
             "passengers": passengers,
+            "combined_price":new_booking.price,
             "priority": priority,
             "insurance": insurance,
             "status": "Waiting for payment"
@@ -286,7 +288,7 @@ def delete_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
         booking.delete()
-        return JsonResponse({'message': 'Booking deleted successfully.'}, status=200)
+        return JsonResponse({'result': 'Deleted'}, status=200)
     except Booking.DoesNotExist:
         return JsonResponse({'error': 'Booking not found.'}, status=404)
 
@@ -326,8 +328,9 @@ def get_booking_details(request, booking_id):
         for customer in allCust:
             custArr.append({
                 "customer_id": customer.id,
-                "name": str(customer.first_name+" "+customer.surname),
-                "passport_id": customer.passport,
+                "first_name": customer.first_name,
+                "last_name": customer.surname,
+                "passport": customer.passport,
                 "seat": customer.seat.number,
                 "luggage":customer.luggage
             })
