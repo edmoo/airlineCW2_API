@@ -15,7 +15,7 @@ def flight_list(request):
         "carry-on": 20.0,
         "checked-in": 30.0
         }
-        for flight in flights:  
+        for flight in flights:
             seats_on_flight = flight.seats.all()
             seat_list = []
             for seat in seats_on_flight:
@@ -27,7 +27,7 @@ def flight_list(request):
                     'status': seat.available
                 }
                 seat_list.append(seat_dict)
-            
+
             my_origin = {
             'id': flight.origin.id,
             'name': flight.origin.name,
@@ -36,7 +36,7 @@ def flight_list(request):
             'terminals': flight.origin.terminals,
             'country': flight.origin.country
             }
-            
+
             my_destination = {
             'id': flight.destination.id,
             'name': flight.destination.name,
@@ -101,7 +101,7 @@ def get_flight(request, flight_id):
             'status': seat.available
         }
         seat_list.append(seat_dict)
-    
+
     my_origin = {
     'id': flight.origin.id,
     'name': flight.origin.name,
@@ -110,7 +110,7 @@ def get_flight(request, flight_id):
     'terminals': flight.origin.terminals,
     'country': flight.origin.country
     }
-    
+
     my_destination = {
     'id': flight.destination.id,
     'name': flight.destination.name,
@@ -119,7 +119,7 @@ def get_flight(request, flight_id):
     'terminals': flight.destination.terminals,
     'country': flight.destination.country
     }
-    
+
     duration_in_minutes = int(flight.duration.total_seconds()//60)
     found_flight = {
     'flight_id': flight.id,
@@ -145,7 +145,6 @@ def flight(request):
         origin = data['origin']
         destination = data['destination']
         departure_date_str = data['departure_date']
-        departure_date = datetime.strptime(departure_date_str, '%Y-%m-%d').date()
         number_of_people = data['number_of_people']
     except (KeyError, ValueError):
         return HttpResponseBadRequest('Required fields not satisfied')
@@ -156,9 +155,11 @@ def flight(request):
         "checked-in": 30.0
         }
     flightArr = []
-    for flight in flights:  
+    departure_date = datetime.fromisoformat(departure_date_str)
+    print(departure_date.date())
+    for flight in flights:
         if(flight.origin.code==origin and flight.destination.code==destination):
-            if(flight.departure_time.date()==departure_date and flight.number_of_seats > number_of_people):
+            if(flight.departure_time.date()==departure_date.date() and flight.number_of_seats > number_of_people):
                 seats_on_flight = flight.seats.all()
                 seat_list = []
                 for seat in seats_on_flight:
@@ -170,7 +171,7 @@ def flight(request):
                         'status': seat.available
                     }
                     seat_list.append(seat_dict)
-                
+
                 my_origin = {
                 'id': flight.origin.id,
                 'name': flight.origin.name,
@@ -179,7 +180,7 @@ def flight(request):
                 'terminals': flight.origin.terminals,
                 'country': flight.origin.country
                 }
-                
+
                 my_destination = {
                 'id': flight.destination.id,
                 'name': flight.destination.name,
@@ -188,7 +189,7 @@ def flight(request):
                 'terminals': flight.destination.terminals,
                 'country': flight.destination.country
                 }
-                
+
                 duration_in_minutes = int(flight.duration.total_seconds()//60)
                 flightArr.append({
                 'flight_id': flight.id,
@@ -208,8 +209,8 @@ def flight(request):
     if(flightArr == []):
         raise Http404("Flight not found")
     return JsonResponse({"flights":flightArr}, safe=False)
-    
-            
+
+
 
 @csrf_exempt
 def add_booking(request,flight_id):
@@ -228,7 +229,7 @@ def add_booking(request,flight_id):
             assign_seat = 0
             seatsAvailable = 0
             for free_seat in all_seats:
-                if free_seat.available == True:
+                if free_seat.available == "Available":
                         for passenger in passengers:
                             if passenger['seat'] == free_seat.number:
                                 seatsAvailable += 1
@@ -242,9 +243,9 @@ def add_booking(request,flight_id):
                 )
                 for passenger in passengers:
                     for free_seat in all_seats:
-                        if free_seat.available == True and free_seat.number == passenger['seat']:
+                        if free_seat.available == "Available" and free_seat.number == passenger['seat']:
                             assign_seat = free_seat
-                            free_seat.available = False
+                            free_seat.available = "Unavailable"
                             flight.number_of_seats -= 1
                             free_seat.save()
                             flight.save()
@@ -264,9 +265,9 @@ def add_booking(request,flight_id):
             else:
                 raise Http404("Seats Unavailable")
         except Flight.DoesNotExist:
-            return JsonResponse({'error': 'Flight not found.'}, status=404) 
+            return JsonResponse({'error': 'Flight not found.'}, status=404)
         new_booking.customer = new_customer
-        new_booking.save()  
+        new_booking.save()
 
         booking_response = {
             "flight_id": flight.id,

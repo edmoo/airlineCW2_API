@@ -29,7 +29,7 @@ class Seat(models.Model):
     category = models.CharField(max_length=10, default='economy')
     price = models.IntegerField(blank=True, null=True)
     number = models.CharField(max_length=10, blank=True, null=True)
-    available = models.BooleanField(default=True)
+    available = models.CharField(max_length=10, blank=True,null=True)
 
 class FlightSeat(models.Model):
     flight = models.ForeignKey('Flight', on_delete=models.CASCADE)
