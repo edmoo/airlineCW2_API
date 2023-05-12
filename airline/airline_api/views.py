@@ -52,16 +52,16 @@ def flight_list(request):
             'airline': "New Airline",
             'origin': my_origin,
             'destination': my_destination,
-            'departure_time': flight.departure_time,
+            'departure_time': flight.departure_time.isoformat(),
             'duration': duration_in_minutes,
-            'arrival_time': flight.departure_time+flight.duration,
+            'arrival_time': (flight.departure_time+flight.duration).isoformat(),
             'plane_type': flight.plane_type,
             'price': flight.price,
             'insurance_price': 15,
             'priority_price': 10,
             'luggage_pricing': luggageDict,
             })
-            return JsonResponse({"flights":flightArr}, safe=False)
+        return JsonResponse({"flights":flightArr}, safe=False)
 
 @csrf_exempt
 def airports(request):
@@ -93,14 +93,15 @@ def get_flight(request, flight_id):
     seats_on_flight = flight.seats.all()
     seat_list = []
     for seat in seats_on_flight:
-        seat_dict = {
-            "seat_id": seat.id,
-            "seat_name":seat.number,
-            'class': seat.category,
-            'price': seat.price,
-            'status': seat.available
-        }
-        seat_list.append(seat_dict)
+        if seat.available == "Available":
+            seat_dict = {
+                "seat_id": seat.id,
+                "seat_name":seat.number,
+                'class': seat.category,
+                'price': seat.price,
+                'status': seat.available
+            }
+            seat_list.append(seat_dict)
 
     my_origin = {
     'id': flight.origin.id,
@@ -126,9 +127,9 @@ def get_flight(request, flight_id):
     'airline': "New Airline",
     'origin': my_origin,
     'destination': my_destination,
-    'departure_time': flight.departure_time,
+    'departure_time': flight.departure_time.isoformat(),
     'duration': duration_in_minutes,
-    'arrival_time': flight.departure_time+flight.duration,
+    'arrival_time': (flight.departure_time+flight.duration).isoformat(),
     'seats': seat_list,
     'plane_type': flight.plane_type,
     'price': flight.price,
@@ -156,21 +157,21 @@ def flight(request):
         }
     flightArr = []
     departure_date = datetime.fromisoformat(departure_date_str)
-    print(departure_date.date())
     for flight in flights:
         if(flight.origin.code==origin and flight.destination.code==destination):
             if(flight.departure_time.date()==departure_date.date() and flight.number_of_seats > number_of_people):
                 seats_on_flight = flight.seats.all()
                 seat_list = []
                 for seat in seats_on_flight:
-                    seat_dict = {
-                        "seat_id": seat.id,
-                        "seat_name":seat.number,
-                        'class': seat.category,
-                        'price': seat.price,
-                        'status': seat.available
-                    }
-                    seat_list.append(seat_dict)
+                    if seat.available == "Available":
+                        seat_dict = {
+                            "seat_id": seat.id,
+                            "seat_name":seat.number,
+                            'class': seat.category,
+                            'price': seat.price,
+                            'status': seat.available
+                        }
+                        seat_list.append(seat_dict)
 
                 my_origin = {
                 'id': flight.origin.id,
@@ -196,9 +197,9 @@ def flight(request):
                 'airline': "New Airline",
                 'origin': my_origin,
                 'destination': my_destination,
-                'departure_time': flight.departure_time,
+                'departure_time': flight.departure_time.isoformat(),
                 'duration': duration_in_minutes,
-                'arrival_time': flight.departure_time+flight.duration,
+                'arrival_time': (flight.departure_time+flight.duration).isoformat(),
                 'seats': seat_list,
                 'plane_type': flight.plane_type,
                 'price': flight.price,
@@ -206,8 +207,6 @@ def flight(request):
                 'priority_price': 10,
                 'luggage_pricing': luggageDict,
                 })
-    if(flightArr == []):
-        raise Http404("Flight not found")
     return JsonResponse({"flights":flightArr}, safe=False)
 
 
