@@ -342,7 +342,7 @@ def get_booking_details(request, booking_id):
             'combined_price':booking.price,
             'passengers':custArr,
             'priority':True,
-            'insurnace':booking.insurance,
+            'insurance':booking.insurance,
             'status':booking.status
         }
         return JsonResponse(booking_dict, status=200)

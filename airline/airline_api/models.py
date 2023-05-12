@@ -50,4 +50,4 @@ class Customer(models.Model):
     surname = models.CharField(max_length=50)
     seat = models.ForeignKey('Seat', on_delete=models.CASCADE, null=True)
     luggage = JSONField()
-    passport = models.IntegerField()
+    passport = models.CharField(max_length=20)
